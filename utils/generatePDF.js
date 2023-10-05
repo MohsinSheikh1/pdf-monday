@@ -2,7 +2,16 @@ const puppeteer = require("puppeteer");
 
 async function generatePDF(html) {
   const browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath:
+      process.env.NODE_ENV == "production"
+        ? process.env.PUPPETEER_EXECUTABLE_PATH
+        : puppeteer.executablePath(),
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--single-process",
+      "--no-zygote",
+    ],
   });
 
   const page = await browser.newPage();
