@@ -21,17 +21,40 @@ exports.schedulePDF = async (req, res) => {
   const time = req.body.time;
   const email = req.body.email;
   console.log("req received");
-  schedule.scheduleJob(time, async () => {
-    console.log("started");
-    const includeSubitems = req.query.includeSubitems === "true" ? true : false;
-    const includeUpdates = req.query.includeUpdates === "true" ? true : false;
-    console.log("mid");
-    const { boardName, columns, groups, items, statusColumns } =
-      await getRequiredData(req.body.context, includeSubitems, includeUpdates);
-    const html = generateHTML(boardName, columns, groups, items, statusColumns);
 
-    const pdf = await generatePDF(html);
-    sendEmail(pdf, email);
-  });
+  schedule.scheduleJob(
+    {
+      year: 2023,
+      month: 10,
+      date: 7,
+      dayOfWeek: 6,
+      hour: 3,
+      minute: 3,
+      tz: "Etc/GMT-5",
+    },
+    async () => {
+      console.log("started");
+      const includeSubitems =
+        req.query.includeSubitems === "true" ? true : false;
+      const includeUpdates = req.query.includeUpdates === "true" ? true : false;
+      console.log("mid");
+      const { boardName, columns, groups, items, statusColumns } =
+        await getRequiredData(
+          req.body.context,
+          includeSubitems,
+          includeUpdates
+        );
+      const html = generateHTML(
+        boardName,
+        columns,
+        groups,
+        items,
+        statusColumns
+      );
+
+      const pdf = await generatePDF(html);
+      sendEmail(pdf, email);
+    }
+  );
   res.send("Job Scheduled");
 };
