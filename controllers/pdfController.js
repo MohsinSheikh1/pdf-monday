@@ -21,8 +21,10 @@ exports.schedulePDF = async (req, res) => {
   const time = req.body.time;
   const email = req.body.email;
   schedule.scheduleJob(time, async () => {
+    console.log("started");
     const includeSubitems = req.query.includeSubitems === "true" ? true : false;
     const includeUpdates = req.query.includeUpdates === "true" ? true : false;
+    console.log("mid");
     const { boardName, columns, groups, items, statusColumns } =
       await getRequiredData(req.body.context, includeSubitems, includeUpdates);
     const html = generateHTML(boardName, columns, groups, items, statusColumns);
