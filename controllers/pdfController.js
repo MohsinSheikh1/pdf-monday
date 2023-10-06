@@ -20,6 +20,7 @@ exports.createPDF = async (req, res) => {
 exports.schedulePDF = async (req, res) => {
   const time = req.body.time;
   const email = req.body.email;
+  console.log("req received");
   schedule.scheduleJob(time, async () => {
     console.log("started");
     const includeSubitems = req.query.includeSubitems === "true" ? true : false;
