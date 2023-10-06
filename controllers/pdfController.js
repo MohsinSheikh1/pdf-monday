@@ -30,6 +30,7 @@ exports.schedulePDF = async (req, res) => {
       dayOfWeek: 6,
       hour: 3,
       minute: 3,
+      second: 30,
       tz: "Etc/GMT-5",
     },
     async () => {
