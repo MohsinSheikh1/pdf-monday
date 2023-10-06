@@ -19,6 +19,7 @@ exports.createPDF = async (req, res) => {
 
 exports.schedulePDF = async (req, res) => {
   const time = req.body.time;
+  const email = req.body.email;
   schedule.scheduleJob(time, async () => {
     const includeSubitems = req.query.includeSubitems === "true" ? true : false;
     const includeUpdates = req.query.includeUpdates === "true" ? true : false;
@@ -27,7 +28,7 @@ exports.schedulePDF = async (req, res) => {
     const html = generateHTML(boardName, columns, groups, items, statusColumns);
 
     const pdf = await generatePDF(html);
-    sendEmail(pdf);
+    sendEmail(pdf, email);
   });
   res.send("Job Scheduled");
 };

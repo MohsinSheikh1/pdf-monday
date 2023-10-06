@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-async function sendEmail(pdf) {
+async function sendEmail(pdf, email) {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     host: "smtp.gmail.com",
@@ -13,7 +13,7 @@ async function sendEmail(pdf) {
 
   const mailOptions = {
     from: "",
-    to: "sheikhmohsin181@gmail.com",
+    to: email,
     subject: "PDF",
     text: "PDF",
     attachments: [
