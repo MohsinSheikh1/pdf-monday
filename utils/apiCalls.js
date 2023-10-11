@@ -2,7 +2,7 @@ const monday = require("monday-sdk-js")();
 
 async function getRequiredData(context, includeSubitems, includeUpdates) {
   monday.setToken(
-    "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI4MTk4Mjg4NywiYWFpIjoxMSwidWlkIjo0ODU5NTMzMiwiaWFkIjoiMjAyMy0wOS0xNFQyMTo0MDo0MS4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTg3MTUzNzYsInJnbiI6ImV1YzEifQ.pmVheIJ_ordb6DX7Zzj3_5ztoe7tWM3dMax0nmo-DTM"
+    "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI4NzUzNjUwMiwiYWFpIjoxMSwidWlkIjo0ODU5NTMzMiwiaWFkIjoiMjAyMy0xMC0wOVQyMTo0Njo0NC42NjlaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTg3MTUzNzYsInJnbiI6ImV1YzEifQ.i3gyroHelPl8KhNiidIgvNeUA1FbX7nWtnBa_k7fcJk"
   );
   let data = JSON.stringify(
     await monday.api(
@@ -21,7 +21,7 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
                 settings_str
               }
              
-                groups(ids: ["new_group", "${context.groupId}"]) {
+                groups(ids: ["${context.groupId}"]) {
                 title
                   items {
                     id
@@ -40,29 +40,34 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
     ),
     { apiVersion: "2023-07" }
   );
-  console.log(data);
 
   data = JSON.parse(data);
   data = data.data;
-  console.dir(data, { depth: null });
 
   if (includeSubitems) {
-    const query = JSON.stringify(
-      await monday.api(
-        `query {
+    const item_ids = data.boards
+      .map((board) => {
+        return board.groups
+          .map((group) => {
+            return group.items.map((item) => item.id);
+          })
+          .flat();
+      })
+      .flat();
+
+    let filteredSubitems = [];
+
+    for (let i = 1; i <= Math.ceil(item_ids.length / 100); i++) {
+      const query = JSON.stringify(
+        await monday.api(
+          `query {
             complexity {
               query
               reset_in_x_seconds
               after
             }
-            items (ids: [${data.boards
-              .map((board) => {
-                return board.groups
-                  .map((group) => {
-                    return group.items.map((item) => item.id).join(",");
-                  })
-                  .join(",");
-              })
+            items (limit: 100, ids: [${item_ids
+              .slice((i - 1) * 100, i * 100)
               .join(",")}]) {
                 subitems {
                   id
@@ -79,14 +84,14 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
                 }
             }
           }`,
-        { apiVersion: "2023-10" }
-      )
-    );
+          { apiVersion: "2023-7" }
+        )
+      );
+      const queryData = JSON.parse(query);
+      let filterItems = queryData.data.items.filter((item) => item.subitems);
+      filterItems.forEach((item) => filteredSubitems.push(item));
+    }
 
-    const subitems = JSON.parse(query);
-    let filteredSubitems = subitems.data.items.filter(
-      (item) => item.subitems !== null
-    );
     filteredSubitems = filteredSubitems
       .map((item) => {
         return item.subitems.map((subitem) => {
@@ -100,7 +105,6 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
       })
       .flat();
 
-    // console.dir(filteredSubitems, { depth: null });
     data.boards.forEach((board) => {
       board.groups.forEach((group) => {
         group.items.forEach((item) => {
@@ -151,15 +155,6 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
   });
 
   const statusColumns = getStatusColumnsData(columns);
-
-  // console.log("-----Columns------------");
-  // console.dir(columns, { depth: null });
-  // console.log("-----Groups-------------");
-  // console.dir(groups, { depth: null });
-  // console.log("-----Items--------------");
-  // console.dir(items, { depth: null });
-  // console.log("-----Column Values------");
-  // console.dir(column_values, { depth: null });
 
   return {
     boardName: data.boards[0].name,

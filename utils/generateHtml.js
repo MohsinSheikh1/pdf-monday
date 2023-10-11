@@ -32,7 +32,9 @@ function generateHTML(
             const labelColorBorder =
               statusColumn.labelColors[labelIndex]?.border || "#797E93";
 
-            return `<td style="background-color: ${labelColorBackground}; border: 1px solid ${labelColorBorder};">${text}</td>`;
+            return `<td style="background-color: ${labelColorBackground}; border: 1px solid ${labelColorBorder};">${
+              text ? text : ""
+            }</td>`;
           }
           return `<td>${text}</td>`;
         })
