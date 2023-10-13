@@ -6,12 +6,11 @@ exports.getUser = async (req, res) => {
   const user = await User.findOne({ id: id });
   if (user) {
     res.status(200).json({
-      message: "User found",
-      apiKey: user.apiKey,
+      hasKey: true,
     });
   } else {
     res.status(404).json({
-      message: "User not found",
+      hasKey: false,
     });
   }
 };
