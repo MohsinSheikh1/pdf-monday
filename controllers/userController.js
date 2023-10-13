@@ -17,8 +17,7 @@ exports.getUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   // create user if user is created send api_key
-  console.log(req.params.code);
-  console.log(req.params.state);
+  console.log(req.query);
   // const id = req.body.id;
   // const apiKey = req.body.apiKey;
   // const user = new User({
