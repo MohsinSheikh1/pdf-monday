@@ -1,3 +1,4 @@
+const { default: axios } = require("axios");
 const User = require("../models/User");
 
 exports.getUser = async (req, res) => {
@@ -16,18 +17,29 @@ exports.getUser = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  // create user if user is created send api_key
-  console.log(req.query);
+  // create user
+  client_id = process.env.CLIENT_ID;
+  client_secret = process.env.CLIENT_SECRET;
 
-  res.send("Authenticated");
+  const code = req.body.code;
+
+  const url = `https://auth.monday.com/oauth2/token`;
+
+  const response = await axios.post(url, {
+    code: code,
+    client_id: client_id,
+    client_secret: client_secret,
+  });
+
+  const apiKey = response.data.access_token;
+
   const id = req.body.id;
-  const apiKey = req.body.apiKey;
   const user = new User({
     id: id,
     apiKey: apiKey,
   });
   await user.save();
   res.json({
-    message: "User Created",
+    message: `User created with id ${id}`,
   });
 };

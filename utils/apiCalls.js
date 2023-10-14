@@ -43,9 +43,10 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
 
   data = JSON.parse(data);
   data = data.data;
+  let item_ids;
 
   if (includeSubitems) {
-    const item_ids = data.boards
+    item_ids = data.boards
       .map((board) => {
         return board.groups
           .map((group) => {
@@ -124,9 +125,6 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
         });
       });
     });
-
-    if (includeUpdates) {
-    }
   }
 
   //Columns -- [{type, title, id, settings_str}]
@@ -156,6 +154,10 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
       };
     });
   });
+
+  if (includeUpdates) {
+    const updates = getUpdates(item_ids);
+  }
 
   const statusColumns = getStatusColumnsData(columns);
 
@@ -188,4 +190,6 @@ function getStatusColumnsData(columns) {
 
 module.exports = { getRequiredData };
 
-function getUpdates(itemIds) {}
+function getUpdates(itemIds) {
+  console.log(itemIds);
+}
