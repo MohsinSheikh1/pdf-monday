@@ -124,6 +124,9 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
         });
       });
     });
+
+    if (includeUpdates) {
+    }
   }
 
   //Columns -- [{type, title, id, settings_str}]
@@ -184,3 +187,5 @@ function getStatusColumnsData(columns) {
 }
 
 module.exports = { getRequiredData };
+
+function getUpdates(itemIds) {}

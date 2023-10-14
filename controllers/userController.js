@@ -9,7 +9,7 @@ exports.getUser = async (req, res) => {
       hasKey: true,
     });
   } else {
-    res.status(404).json({
+    res.status(200).json({
       hasKey: false,
     });
   }
@@ -20,12 +20,14 @@ exports.createUser = async (req, res) => {
   console.log(req.query);
 
   res.send("Authenticated");
-  // const id = req.body.id;
-  // const apiKey = req.body.apiKey;
-  // const user = new User({
-  //   id: id,
-  //   apiKey: apiKey,
-  // });
-  // await user.save();
-  // res.send(apiKey);
+  const id = req.body.id;
+  const apiKey = req.body.apiKey;
+  const user = new User({
+    id: id,
+    apiKey: apiKey,
+  });
+  await user.save();
+  res.json({
+    message: "User Created",
+  });
 };
