@@ -4,11 +4,10 @@ async function getRequiredData(
   context,
   includeSubitems,
   includeUpdates,
-  wholeBoard
+  wholeBoard,
+  apiKey
 ) {
-  monday.setToken(
-    "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI4NzUzNjUwMiwiYWFpIjoxMSwidWlkIjo0ODU5NTMzMiwiaWFkIjoiMjAyMy0xMC0wOVQyMTo0Njo0NC42NjlaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTg3MTUzNzYsInJnbiI6ImV1YzEifQ.i3gyroHelPl8KhNiidIgvNeUA1FbX7nWtnBa_k7fcJk"
-  );
+  monday.setToken(apiKey);
   let data;
 
   if (wholeBoard) {
