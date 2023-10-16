@@ -21,7 +21,7 @@ async function generatePDF(html) {
   await page.emulateMediaType("screen");
 
   const pdf = await page.pdf({
-    format: "A4",
+    format: "A2",
     printBackground: true,
   });
 

@@ -1,17 +1,51 @@
 const monday = require("monday-sdk-js")();
 
-async function getRequiredData(context, includeSubitems, includeUpdates) {
+async function getRequiredData(
+  context,
+  includeSubitems,
+  includeUpdates,
+  wholeBoard
+) {
   monday.setToken(
     "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI4NzUzNjUwMiwiYWFpIjoxMSwidWlkIjo0ODU5NTMzMiwiaWFkIjoiMjAyMy0xMC0wOVQyMTo0Njo0NC42NjlaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTg3MTUzNzYsInJnbiI6ImV1YzEifQ.i3gyroHelPl8KhNiidIgvNeUA1FbX7nWtnBa_k7fcJk"
   );
-  let data = JSON.stringify(
-    await monday.api(
-      `query {
-          complexity {
-            query
-            reset_in_x_seconds
-            after
-          }
+  let data;
+
+  if (wholeBoard) {
+    //get group ids
+    const groupIdsQuery = JSON.parse(
+      JSON.stringify(
+        await monday.api(
+          `query {
+              complexity {
+                query
+                reset_in_x_seconds
+                after
+              }
+              boards (ids: [${context.boardId}]) {
+                groups {
+                  id
+                }
+              }
+            
+          }`
+        )
+      )
+    );
+    console.dir(groupIdsQuery, { depth: null });
+
+    const groupIds = groupIdsQuery.data.boards[0].groups.map(
+      (group) => group.id
+    );
+
+    data = JSON.stringify(
+      await monday.api(
+        `query {
+            complexity {
+              query
+              reset_in_x_seconds
+              after
+            }
             boards (ids: [${context.boardId}]) {
               name
               columns {
@@ -20,42 +54,75 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
                 id
                 settings_str
               }
-             
-                groups(ids: ["${context.groupId}"]) {
+              groups(ids: [${groupIds.map((id) => `"${id}"`).join(",")}]) {
                 title
-                  items {
+                items {
+                  id
+                  name
+                  column_values {
+                    value
+                    type
                     id
-                    name
-                    column_values {
-                      value
-                      type
-                      id
-                      text
-                    }
-                  
+                    text
+                  }                  
                 }
               }
             }
           }`
-    ),
-    { apiVersion: "2023-07" }
-  );
+      ),
+      { apiVersion: "2023-07" }
+    );
+  } else {
+    data = JSON.stringify(
+      await monday.api(
+        `query {
+            complexity {
+              query
+              reset_in_x_seconds
+              after
+            }
+            boards (ids: [${context.boardId}]) {
+              name
+              columns {
+                type
+                title
+                id
+                settings_str
+              }
+              groups(ids: ["${context.groupId}"]) {
+                title
+                items {
+                  id
+                  name
+                  column_values {
+                    value
+                    type
+                    id
+                    text
+                  }                  
+                }
+              }
+            }
+          }`
+      ),
+      { apiVersion: "2023-07" }
+    );
+  }
 
   data = JSON.parse(data);
   data = data.data;
-  let item_ids;
+
+  const item_ids = data.boards
+    .map((board) => {
+      return board.groups
+        .map((group) => {
+          return group.items.map((item) => item.id);
+        })
+        .flat();
+    })
+    .flat();
 
   if (includeSubitems) {
-    item_ids = data.boards
-      .map((board) => {
-        return board.groups
-          .map((group) => {
-            return group.items.map((item) => item.id);
-          })
-          .flat();
-      })
-      .flat();
-
     let filteredSubitems = [];
 
     for (let i = 1; i <= Math.ceil(item_ids.length / 100); i++) {
@@ -155,8 +222,9 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
     });
   });
 
+  let updates = "";
   if (includeUpdates) {
-    const updates = getUpdates(item_ids);
+    updates = await getUpdates(item_ids);
   }
 
   const statusColumns = getStatusColumnsData(columns);
@@ -167,6 +235,7 @@ async function getRequiredData(context, includeSubitems, includeUpdates) {
     groups,
     items,
     statusColumns,
+    updates,
   };
 }
 
@@ -190,6 +259,93 @@ function getStatusColumnsData(columns) {
 
 module.exports = { getRequiredData };
 
-function getUpdates(itemIds) {
-  console.log(itemIds);
+async function getUpdates(itemIds) {
+  let data = [];
+  for (let i = 1; i <= Math.ceil(itemIds.length / 25); i++) {
+    const chunk = JSON.parse(
+      JSON.stringify(
+        await monday.api(
+          `
+          query {
+            complexity {
+              query
+              reset_in_x_seconds
+              after
+            }
+            items (limit: 25, ids: [${itemIds
+              .slice((i - 1) * 25, i * 25)
+              .join(",")}]) {
+              id
+              name
+              updates {
+                created_at
+                text_body
+                updated_at
+                creator {
+                  name
+                }
+              }
+            }
+          }
+        `,
+          {
+            apiVersion: "2023-07",
+          }
+        )
+      )
+    );
+
+    const filteredItems = chunk.data.items.filter((item) => {
+      return item.updates.length !== 0;
+    });
+
+    data.push(filteredItems);
+  }
+  data = data.flat();
+
+  return data;
 }
+
+// exports.multipleItemsAPI = async function (
+//   context,
+//   includeSubitems,
+//   includeUpdates
+// ) {
+//   monday.setToken(
+//     "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI4NzUzNjUwMiwiYWFpIjoxMSwidWlkIjo0ODU5NTMzMiwiaWFkIjoiMjAyMy0xMC0wOVQyMTo0Njo0NC42NjlaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTg3MTUzNzYsInJnbiI6ImV1YzEifQ.i3gyroHelPl8KhNiidIgvNeUA1FbX7nWtnBa_k7fcJk"
+//   );
+
+//   for (let i = 1; i <= Math.ceil(context.selectedPulsesIds.length / 100); i++) {
+//     const query = JSON.stringify(
+//       await monday.api(
+//         `query {
+//           complexity {
+//             query
+//             reset_in_x_seconds
+//             after
+//           }
+//           items (limit: 100, ids: [${context.selectedPulsesIds.length
+//             .slice((i - 1) * 100, i * 100)
+//             .join(",")}]) {
+//             id
+//             group {
+//               title
+//               id
+//             }
+//             name
+//             column_values {
+//               value
+//               type
+//               id
+//               text
+//             }
+//           }
+//         }`,
+//         { apiVersion: "2023-7" }
+//       )
+//     );
+
+//     const queryData = JSON.parse(query);
+
+//   }
+// };

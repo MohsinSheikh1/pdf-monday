@@ -1,18 +1,28 @@
-const { generateHTML } = require("../utils/generateHtml");
 const { generatePDF } = require("../utils/generatePDF");
 const { getRequiredData } = require("../utils/apiCalls");
 const { sendEmail } = require("../utils/sendEmail");
+const { generateHTML, generateUpdtesHTML } = require("../utils/generateHTML");
 const schedule = require("node-schedule");
 
 exports.createPDF = async (req, res) => {
   const includeSubitems = req.query.includeSubitems === "true" ? true : false;
   const includeUpdates = req.query.includeUpdates === "true" ? true : false;
+  const wholeBoard = req.query.wholeBoard === "true" ? true : false;
 
-  const { boardName, columns, groups, items, statusColumns } =
-    await getRequiredData(req.body, includeSubitems, includeUpdates);
+  const { boardName, columns, groups, items, statusColumns, updates } =
+    await getRequiredData(
+      req.body,
+      includeSubitems,
+      includeUpdates,
+      wholeBoard
+    );
   const html = generateHTML(boardName, columns, groups, items, statusColumns);
-
   const pdf = await generatePDF(html);
+  let updatesPDF = false;
+  if (includeUpdates) {
+    const updatesHTML = generateUpdtesHTML(updates, boardName);
+    updatesPDF = await generatePDF(updatesHTML);
+  }
   res.contentType("application/pdf");
   res.send(pdf);
 };
@@ -20,7 +30,6 @@ exports.createPDF = async (req, res) => {
 exports.schedulePDF = async (req, res) => {
   const time = req.body.time;
   const email = req.body.email;
-  console.log("req received");
 
   schedule.scheduleJob(
     {
@@ -34,18 +43,19 @@ exports.schedulePDF = async (req, res) => {
       tz: "Etc/GMT-5",
     },
     async () => {
-      console.log("started");
       const includeSubitems =
         req.query.includeSubitems === "true" ? true : false;
       const includeUpdates = req.query.includeUpdates === "true" ? true : false;
-      console.log("mid");
-      const { boardName, columns, groups, items, statusColumns } =
+      const wholeBoard = req.query.wholeBoard === "true" ? true : false;
+
+      const { boardName, columns, groups, items, statusColumns, updates } =
         await getRequiredData(
           req.body.context,
           includeSubitems,
-          includeUpdates
+          includeUpdates,
+          wholeBoard
         );
-      const html = generateHTML(
+      const html = generateHtml(
         boardName,
         columns,
         groups,
