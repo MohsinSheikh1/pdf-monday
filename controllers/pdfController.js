@@ -1,7 +1,7 @@
 const { generatePDF } = require("../utils/generatePDF");
 const { getRequiredData } = require("../utils/apiCalls");
 const { sendEmail } = require("../utils/sendEmail");
-const { generateHTML, generateUpdtesHTML } = require("../utils/generateHTML");
+const { generateHTML, generateUpdtesHTML } = require("../utils/generateHtml");
 const schedule = require("node-schedule");
 const User = require("../models/User");
 
