@@ -6,16 +6,16 @@ async function sendEmail(pdf, email) {
     host: "smtp.gmail.com",
     port: 465,
     auth: {
-      user: "sheikhmohsin181@gmail.com",
-      pass: "ebmj lpyz ocbb wbwk",
+      user: process.env.EMAIL_FROM,
+      pass: process.env.PASSWORD,
     },
   });
 
   const mailOptions = {
-    from: "",
-    to: "sheikhmohsin181@gmail.com",
+    from: process.env.EMAIL_FROM,
+    to: email,
     subject: "PDF",
-    text: "PDF",
+    text: "Your requested pdf from monday.com",
     attachments: [
       {
         filename: "PDF.pdf",
