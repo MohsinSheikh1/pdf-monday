@@ -76,8 +76,8 @@ exports.schedulePDF = async (req, res) => {
     const pdf = await generatePDF(html);
     const rule = new schedule.RecurrenceRule();
     rule.month = 9;
-    rule.hour = 4;
-    rule.minute = 50;
+    rule.hour = 5;
+    rule.minute = 22;
     rule.date = 22;
     rule.tz = "UTC+05:00";
 
