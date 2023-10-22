@@ -55,6 +55,7 @@ exports.schedulePDF = async (req, res) => {
     const includeSubitems = req.query.includeSubitems === "true" ? true : false;
     const includeUpdates = req.query.includeUpdates === "true" ? true : false;
     const wholeBoard = req.query.wholeBoard === "true" ? true : false;
+    const user_id = req.body.context.user.id;
     const user = await User.findOne({ id: user_id });
     const apiKey = user.apiKey;
     const { boardName, columns, groups, items, statusColumns, updates } =
@@ -73,13 +74,23 @@ exports.schedulePDF = async (req, res) => {
     html += "</body> </html>";
 
     const pdf = await generatePDF(html);
+    const rule = new schedule.RecurrenceRule();
+    rule.month = 9;
+    rule.hour = 4;
+    rule.minute = 50;
+    rule.date = 22;
+    rule.tz = "UTC+05:00";
 
-    schedule.scheduleJob(
-      time,
+    const date = new Date("");
+
+    const job = schedule.scheduleJob(
+      rule,
       async function (pdf, email) {
+        console.log("now");
         sendEmail(pdf, email);
       }.bind(null, pdf, email)
     );
+    console.log(job.nextInvocation());
     res.send("Job Scheduled");
   } catch (error) {
     console.log(error);
