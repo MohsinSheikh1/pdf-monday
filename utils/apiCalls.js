@@ -5,9 +5,25 @@ async function getRequiredData(
   includeSubitems,
   includeUpdates,
   wholeBoard,
-  apiKey
+  apiKey,
+  res
 ) {
   monday.setToken(apiKey);
+
+  const checkAuth = await monday.api(
+    `query {
+      complexity {
+        query
+        reset_in_x_seconds
+        after
+      }
+    }`,
+    { apiVersion: "2023-07" }
+  );
+
+  if (checkAuth.errors) {
+    return res.json({ error: "Invalid Authentication" });
+  }
   let data;
 
   if (wholeBoard) {
@@ -29,7 +45,8 @@ async function getRequiredData(
             
           }`
         )
-      )
+      ),
+      { apiVersion: "2023-07" }
     );
     console.dir(groupIdsQuery, { depth: null });
 

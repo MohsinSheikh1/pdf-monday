@@ -40,7 +40,6 @@ exports.createPDF = async (req, res) => {
     res.contentType("application/pdf");
     res.send(pdf);
   } catch (err) {
-    console.log(err);
     res.status(400).json({
       message: "Server Error occured",
     });
@@ -74,27 +73,17 @@ exports.schedulePDF = async (req, res) => {
     html += "</body> </html>";
 
     const pdf = await generatePDF(html);
-    const rule = new schedule.RecurrenceRule();
-    rule.month = 9;
-    rule.hour = 14;
-    rule.minute = 47;
-    rule.date = 22;
-    rule.year = 2023;
-    rule.tz = "UTC+05:00";
 
-    const date = new Date("");
+    const date = new Date(time);
 
     const job = schedule.scheduleJob(
-      rule,
+      date,
       async function (pdf, email) {
-        console.log("now");
         sendEmail(pdf, email);
       }.bind(null, pdf, email)
     );
-    console.log(job.nextInvocation());
     res.send("Job Scheduled");
   } catch (error) {
-    console.log(error);
     res.status(400).json({
       message: "Server Error Occured",
     });

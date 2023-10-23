@@ -34,12 +34,23 @@ exports.createUser = async (req, res) => {
   const apiKey = response.data.access_token;
 
   const id = req.body.id;
-  const user = new User({
-    id: id,
-    apiKey: apiKey,
-  });
-  await user.save();
-  res.json({
-    message: `User created with id ${id}`,
-  });
+
+  const user1 = await User.findOne({ id: id });
+
+  if (user1) {
+    user1.set({ apiKey: apiKey });
+    await user1.save();
+    res.json({
+      message: `User created with id ${id}`,
+    });
+  } else {
+    const user = new User({
+      id: id,
+      apiKey: apiKey,
+    });
+    await user.save();
+    res.json({
+      message: `User updated with id ${id}`,
+    });
+  }
 };
