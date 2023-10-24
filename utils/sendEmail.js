@@ -6,13 +6,13 @@ async function sendEmail(pdf, email) {
     host: "smtp.gmail.com",
     port: 465,
     auth: {
-      user: process.env.EMAIL_FROM,
-      pass: process.env.PASSWORD,
+      user: "notifications@beastical.com",
+      pass: "oald kznx ndsw pjpe",
     },
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM,
+    from: "notifications@beastical.com",
     to: email,
     subject: "PDF",
     text: "Your requested pdf from monday.com",

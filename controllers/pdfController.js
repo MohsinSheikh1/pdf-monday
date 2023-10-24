@@ -49,11 +49,19 @@ exports.createPDF = async (req, res) => {
 exports.schedulePDF = async (req, res) => {
   try {
     const time = req.body.time;
+    const currentTime = new Date();
+    if (time < currentTime.getTime() || !time) {
+      return res.status(400).json({
+        message: "Invalid Time",
+      });
+    }
+    console.log("Time from front end: " + time);
     const email = req.body.email;
 
     const includeSubitems = req.query.includeSubitems === "true" ? true : false;
     const includeUpdates = req.query.includeUpdates === "true" ? true : false;
     const wholeBoard = req.query.wholeBoard === "true" ? true : false;
+
     const user_id = req.body.context.user.id;
     const user = await User.findOne({ id: user_id });
     const apiKey = user.apiKey;
@@ -75,10 +83,12 @@ exports.schedulePDF = async (req, res) => {
     const pdf = await generatePDF(html);
 
     const date = new Date(time);
+    console.log("Date created from time " + date);
 
     const job = schedule.scheduleJob(
       date,
       async function (pdf, email) {
+        console.log("Inside Schedule");
         sendEmail(pdf, email);
       }.bind(null, pdf, email)
     );
