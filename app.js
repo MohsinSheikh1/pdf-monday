@@ -10,5 +10,6 @@ app.use(express.json());
 
 app.use("/api", pdfRoute);
 app.use("/api", userRoute);
+app.use("/page", express.static(`${__dirname}/public`));
 
 module.exports = app;
