@@ -7,6 +7,7 @@ const User = require("../models/User");
 
 exports.createPDF = async (req, res) => {
   try {
+    console.log(req.headers);
     const includeSubitems = req.query.includeSubitems === "true" ? true : false;
     const includeUpdates = req.query.includeUpdates === "true" ? true : false;
     const wholeBoard = req.query.wholeBoard === "true" ? true : false;
