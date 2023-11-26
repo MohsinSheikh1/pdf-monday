@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const pdfRoute = require("./routes/pdfRoute");
 const userRoute = require("./routes/userRoute");
+const accountRoute = require("./routes/accountRoute");
 
 const app = express();
 // app.use(cors());
@@ -18,5 +19,6 @@ app.use(
 );
 app.use("/api", cors(), userRoute);
 app.use("/page", cors(), express.static(`${__dirname}/public`));
+app.use("/api", cors(), accountRoute);
 
 module.exports = app;

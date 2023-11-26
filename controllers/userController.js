@@ -7,10 +7,12 @@ exports.getUser = async (req, res) => {
   const account_id = req.query.account_id;
   const user = await User.findOne({ id: id, account_id: account_id });
   if (user) {
+    console.log("user found");
     res.status(200).json({
       hasKey: true,
     });
   } else {
+    console.log("user found");
     res.status(200).json({
       hasKey: false,
     });
@@ -46,6 +48,7 @@ exports.createUser = async (req, res) => {
       message: `User updated with id ${id}`,
     });
   } else {
+    console.log(`New user with id ${id} and account_id ${account_id}`);
     const user = new User({
       id: id,
       account_id: account_id,
