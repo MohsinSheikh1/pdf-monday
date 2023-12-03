@@ -35,6 +35,7 @@ exports.createUser = async (req, res) => {
     code: code,
     client_id: client_id,
     client_secret: client_secret,
+    redirect_uri: "https://xportpdfmonday.netlify.app/",
   });
   console.log("done");
 
