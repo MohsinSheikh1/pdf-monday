@@ -25,7 +25,7 @@ exports.createUser = async (req, res) => {
   client_secret = process.env.CLIENT_SECRET;
 
   const code = req.body.code;
-  console.log(code);
+  // console.log(code);
 
   const url = `https://auth.monday.com/oauth2/token`;
 

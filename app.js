@@ -9,14 +9,7 @@ app.use(cors());
 
 app.use(express.json());
 
-app.use(
-  "/api",
-  cors({
-    origin: "https://xportpdfmonday.netlify.app",
-    optionsSuccessStatus: 200,
-  }),
-  pdfRoute
-);
+app.use("/api", pdfRoute);
 app.use("/api", userRoute);
 app.use("/page", express.static(`${__dirname}/public`));
 app.use("/api", accountRoute);
