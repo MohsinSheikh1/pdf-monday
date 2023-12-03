@@ -5,14 +5,17 @@ const router = express.Router();
 
 router.route("/accountSlug").post((req, res) => {
   const token = req.body.token;
+  console.log("secret" + process.env.CLIENT_SECRET);
+  console.log("token" + token);
   const decoded = jwt.verify(token, process.env.CLIENT_SECRET);
-
   if (decoded) {
+    console.log("decoded");
     res.status(200).json({
       accountSlug: decoded.dat.slug,
     });
   } else {
-    res.ststus(500).json({
+    console.log("not decoded");
+    res.status(500).json({
       message: "Error",
     });
   }
