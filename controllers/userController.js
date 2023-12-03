@@ -7,12 +7,12 @@ exports.getUser = async (req, res) => {
   const account_id = req.query.account_id;
   const user = await User.findOne({ id: id, account_id: account_id });
   if (user) {
-    console.log("user found");
+    // console.log("user found");
     res.status(200).json({
       hasKey: true,
     });
   } else {
-    console.log("user found");
+    // console.log("user found");
     res.status(200).json({
       hasKey: false,
     });
@@ -25,6 +25,7 @@ exports.createUser = async (req, res) => {
   client_secret = process.env.CLIENT_SECRET;
 
   const code = req.body.code;
+  console.log(code);
 
   const url = `https://auth.monday.com/oauth2/token`;
 
@@ -35,9 +36,12 @@ exports.createUser = async (req, res) => {
   });
 
   const apiKey = response.data.access_token;
+  console.log(apiKey);
 
   const id = req.body.id;
   const account_id = req.body.account_id;
+
+  console.log(`ID: ${id}, Account_ID: ${account_id}`);
 
   const user1 = await User.findOne({ id: id, account_id: account_id });
 
