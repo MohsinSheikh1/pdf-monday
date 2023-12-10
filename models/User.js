@@ -5,6 +5,7 @@ const UserSchema = new Schema({
   id: { type: String, required: [true, "User ID is required"] },
   apiKey: { type: String, required: [true, "API key is required"] },
   account_id: { type: String, required: [true, "Account ID is required"] },
+  iv: { type: String, required: [true, "iv is required"] },
 });
 
 module.exports = mongoose.model("User", UserSchema);

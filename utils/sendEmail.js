@@ -7,7 +7,7 @@ async function sendEmail(pdf, email) {
     port: 465,
     auth: {
       user: "notifications@beastical.com",
-      pass: "oald kznx ndsw pjpe",
+      pass: process.env.PASSWORD,
     },
   });
 

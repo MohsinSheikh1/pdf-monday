@@ -138,10 +138,22 @@ async function getRequiredData(
     })
     .flat();
 
+  const comp = await monday.api(`
+    query {
+      complexity {
+        query
+        reset_in_x_seconds
+        after
+      }
+    }
+    `);
+
+  console.dir(comp, { depth: null });
+
   if (includeSubitems) {
     let filteredSubitems = [];
 
-    for (let i = 1; i <= Math.ceil(item_ids.length / 100); i++) {
+    for (let i = 1; i <= Math.ceil(item_ids.length / 5); i++) {
       const query = JSON.stringify(
         await monday.api(
           `query {
@@ -150,8 +162,8 @@ async function getRequiredData(
               reset_in_x_seconds
               after
             }
-            items (limit: 100, ids: [${item_ids
-              .slice((i - 1) * 100, i * 100)
+            items (limit: 5, ids: [${item_ids
+              .slice((i - 1) * 5, i * 5)
               .join(",")}]) {
                 subitems {
                   id
@@ -172,6 +184,7 @@ async function getRequiredData(
         )
       );
       const queryData = JSON.parse(query);
+      console.dir(queryData, { depth: null });
       let filterItems = queryData.data.items.filter((item) => item.subitems);
       filterItems.forEach((item) => filteredSubitems.push(item));
     }

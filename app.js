@@ -3,11 +3,19 @@ const cors = require("cors");
 const pdfRoute = require("./routes/pdfRoute");
 const userRoute = require("./routes/userRoute");
 const accountRoute = require("./routes/accountRoute");
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
 
 const app = express();
 app.use(cors());
 
 app.use(express.json());
+
+//Data Sanitization
+app.use(mongoSanitize());
+
+//Data sanitize
+app.use(xss());
 
 app.use("/api", pdfRoute);
 app.use("/api", userRoute);

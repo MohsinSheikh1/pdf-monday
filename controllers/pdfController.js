@@ -4,6 +4,7 @@ const { sendEmail } = require("../utils/sendEmail");
 const { generateHTML, generateUpdtesHTML } = require("../utils/generateHtml");
 const schedule = require("node-schedule");
 const User = require("../models/User");
+const { decryptToken } = require("../utils/encryptDecrypts");
 
 exports.createPDF = async (req, res) => {
   try {
@@ -13,15 +14,18 @@ exports.createPDF = async (req, res) => {
     const wholeBoard = req.query.wholeBoard === "true" ? true : false;
 
     user_id = req.body.user.id;
+    account_id = req.body.account.id;
 
     //Getting API key from database
-    const user = await User.findOne({ id: user_id });
+    const user = await User.findOne({ id: user_id, account_id });
     if (!user) {
       return res.status(400).json({
         message: "User not found",
       });
     }
     const apiKey = user.apiKey;
+    const iv = user.iv;
+    const decryptedApiToken = decryptToken(apiKey, iv);
 
     const { boardName, columns, groups, items, statusColumns, updates } =
       await getRequiredData(
@@ -29,6 +33,7 @@ exports.createPDF = async (req, res) => {
         includeSubitems,
         includeUpdates,
         wholeBoard,
+        decryptedApiToken,
         apiKey
       );
     let html = generateHTML(boardName, columns, groups, items, statusColumns);
@@ -41,6 +46,7 @@ exports.createPDF = async (req, res) => {
     res.contentType("application/pdf");
     res.send(pdf);
   } catch (err) {
+    console.log(err);
     res.status(400).json({
       message: "Server Error occured",
     });
@@ -64,15 +70,23 @@ exports.schedulePDF = async (req, res) => {
     const wholeBoard = req.query.wholeBoard === "true" ? true : false;
 
     const user_id = req.body.context.user.id;
-    const user = await User.findOne({ id: user_id });
+    const account_id = req.body.account.id;
+    const user = await User.findOne({ id: user_id, account_id });
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
     const apiKey = user.apiKey;
+    const iv = user.iv;
+    const decryptedApiToken = decryptToken(apiKey, iv);
     const { boardName, columns, groups, items, statusColumns, updates } =
       await getRequiredData(
         req.body.context,
         includeSubitems,
         includeUpdates,
         wholeBoard,
-        apiKey
+        decryptedApiToken
       );
     let html = generateHTML(boardName, columns, groups, items, statusColumns);
     if (includeUpdates) {
