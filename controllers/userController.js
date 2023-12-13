@@ -37,8 +37,8 @@ exports.createUser = async (req, res) => {
 
   let apiKey = response.data.access_token;
   console.log(apiKey);
-  const { iv, encryptedApiKey } = encryptToken(response.data.access_token);
-  console.log(iv, encryptedApiKey);
+  const { iv, encrypted } = encryptToken(response.data.access_token);
+  console.log(iv, encrypted);
 
   const id = req.body.id;
   const account_id = req.body.account_id;
@@ -48,7 +48,7 @@ exports.createUser = async (req, res) => {
   const user1 = await User.findOne({ id: id, account_id: account_id });
 
   if (user1) {
-    user1.set({ apiKey: encryptedApiKey, iv: iv });
+    user1.set({ apiKey: encrypted, iv: iv });
     await user1.save();
     res.json({
       message: `User updated with id ${id} and account id ${account_id}`,
@@ -58,7 +58,7 @@ exports.createUser = async (req, res) => {
     const user = new User({
       id: id,
       account_id: account_id,
-      apiKey: encryptedApiKey,
+      apiKey: encrypted,
       iv: iv,
     });
     await user.save();

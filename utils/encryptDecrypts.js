@@ -1,6 +1,5 @@
-const crypto = require("crypto");
-
 exports.encryptToken = function (token) {
+  const crypto = require("crypto");
   const iv = crypto.randomBytes(16).toString("hex").substring(0, 16);
   const cipher = crypto.createCipheriv(
     "aes-256-cbc",
@@ -17,6 +16,7 @@ exports.encryptToken = function (token) {
 };
 
 exports.decryptToken = function (token, iv) {
+  const crypto = require("crypto");
   const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
     process.env.CLIENT_SECRET,
