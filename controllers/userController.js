@@ -1,14 +1,27 @@
 const { default: axios } = require("axios");
 const User = require("../models/User");
 const { encryptToken } = require("../utils/encryptDecrypts");
+const logger = require("../utils/logger");
 
 exports.getUser = async (req, res) => {
+  //get User ip
+  const ipware = require("ipware")().get_ip;
+  const ipinfo = ipware(req);
+  const ipaddress =
+    ipinfo.clientIp !== "127.0.0.1" ? ipinfo.clientIp : "IP address not found";
+
   // find user if user is not found send user not found if found send api_key
   const id = req.query.user_id;
   const account_id = req.query.account_id;
   const user = await User.findOne({ id: id, account_id: account_id });
+
   if (user) {
     // console.log("user found");
+    logger.log("info", `New user ${id} with account ${account_id}`, {
+      account_id: account_id,
+      user_id: id,
+      ip_address: ipaddress,
+    });
     res.status(200).json({
       hasKey: true,
     });
@@ -21,6 +34,12 @@ exports.getUser = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
+  //get User ip
+  const ipware = require("ipware")().get_ip;
+  const ipinfo = ipware(req);
+  const ipaddress =
+    ipinfo.clientIp !== "127.0.0.1" ? ipinfo.clientIp : "IP address not found";
+
   // create user
 
   const code = req.body.code;
@@ -62,8 +81,23 @@ exports.createUser = async (req, res) => {
       iv: iv,
     });
     await user.save();
+    logger.log("info", `New user ${id} with account ${account_id}`, {
+      account_id: account_id,
+      user_id: id,
+      ip_address: ipaddress,
+    });
     res.json({
       message: `User created with id ${id} and account id ${account_id}`,
     });
   }
+};
+
+exports.handleEvent = async function (req, res) {
+  res.status(200).send({});
+
+  const token = req.headers.authorization;
+  const decoded = jwt.verify(token, process.env.CLIENT_SECRET);
+  const subscription = decoded.subscription;
+  console.dir(subscription, { depth: null });
+  console.dir(decoded, { depth: null });
 };

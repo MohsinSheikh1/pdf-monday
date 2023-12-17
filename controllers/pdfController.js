@@ -5,10 +5,19 @@ const { generateHTML, generateUpdtesHTML } = require("../utils/generateHtml");
 const schedule = require("node-schedule");
 const User = require("../models/User");
 const { decryptToken } = require("../utils/encryptDecrypts");
+const logger = require("../utils/logger");
 
 exports.createPDF = async (req, res) => {
   try {
     // console.log(req.headers);
+    //get User ip
+    const ipware = require("ipware")().get_ip;
+    const ipinfo = ipware(req);
+    const ipaddress =
+      ipinfo.clientIp !== "127.0.0.1"
+        ? ipinfo.clientIp
+        : "IP address not found";
+
     const includeSubitems = req.query.includeSubitems === "true" ? true : false;
     const includeUpdates = req.query.includeUpdates === "true" ? true : false;
     const wholeBoard = req.query.wholeBoard === "true" ? true : false;
@@ -43,6 +52,13 @@ exports.createPDF = async (req, res) => {
     }
     html += "</body> </html>";
     const pdf = await generatePDF(html);
+
+    logger.log(
+      "info",
+      `User ${user_id} on account ${account_id} exported a pdf.`,
+      { account_id: account_id, user_id: user_id, ip_address: ipaddress }
+    );
+
     res.contentType("application/pdf");
     res.send(pdf);
   } catch (err) {
@@ -106,6 +122,11 @@ exports.schedulePDF = async (req, res) => {
         console.log("Inside Schedule");
         sendEmail(pdf, email);
       }.bind(null, pdf, email)
+    );
+    logger.log(
+      "info",
+      `User ${user_id} on account ${account_id} scheduled a pdf.`,
+      { account_id: account_id, user_id: user_id, ip_address: ipaddress }
     );
     res.send("Job Scheduled");
   } catch (error) {
