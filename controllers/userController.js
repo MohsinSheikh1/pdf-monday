@@ -2,6 +2,8 @@ const { default: axios } = require("axios");
 const User = require("../models/User");
 const { encryptToken } = require("../utils/encryptDecrypts");
 const logger = require("../utils/logger");
+const jwt = require("jsonwebtoken");
+const Account = require("../models/Account");
 
 exports.getUser = async (req, res) => {
   //get User ip
@@ -97,7 +99,49 @@ exports.handleEvent = async function (req, res) {
 
   const token = req.headers.authorization;
   const decoded = jwt.verify(token, process.env.CLIENT_SECRET);
-  const subscription = decoded.subscription;
-  console.dir(subscription, { depth: null });
-  console.dir(decoded, { depth: null });
+
+  if (decoded) {
+    const type = req.body.type;
+    if (type == "uninstall") {
+      //code to remove user data
+    } else if (type == "install") {
+      //code for install
+    } else if (type == "app_subscription_changed") {
+      //code for app subscription changed
+    } else if (type == "app_subscription_renewed") {
+      //code for app subscription renewed
+    } else if (type == "app_subscription_cancelled_by_user") {
+      //code for app subscription cancelled by user (paid period is not ended)
+    } else if (type == "app_subscription_cancelled") {
+      //code for app subscription cancelled (paid period is ended)
+    } else if (type == "app_subscription_cancellation_revoked_by_user") {
+      //code for app subscription cancelled revoked by user
+    } else if (type == "app_trial_subscription_started") {
+      //code for app subscription trial started
+    } else if (type == "app_trial_subscription_ended") {
+      //code for app subscription trial ended
+    } else if (type == "app_subscription_created") {
+      //code for app subscription created (new)
+
+      //getting subscription attributes
+      const account_id = req.body.data.account_id;
+      const { plan_id, renewal_date } = req.body.data.subscription;
+      let exports_remaining;
+      //Create a new account
+      if (plan_id === "1001") {
+        exports_remaining = 30;
+      } else if (plan_id === "1002") {
+        exports_remaining = 70;
+      } else if (plan_id === "1002") {
+        exports_remaining = 100;
+      }
+      const account = new Account({
+        account_id,
+        plan_id,
+        renewal_date,
+        exports_remaining,
+      });
+      await account.save();
+    }
+  }
 };
