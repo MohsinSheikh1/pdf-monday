@@ -22,7 +22,7 @@ async function getRequiredData(
   );
 
   if (checkAuth.errors) {
-    return res.json({ error: "Invalid Authentication" });
+    return res.send({ error: "Invalid Authentication" });
   }
   let data;
 
