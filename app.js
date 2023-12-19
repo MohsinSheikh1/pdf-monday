@@ -5,8 +5,19 @@ const userRoute = require("./routes/userRoute");
 const accountRoute = require("./routes/accountRoute");
 const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
+const helmet = require("helmet");
 
 const app = express();
+
+app.use(
+  helmet({
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+  })
+);
 app.use(cors());
 
 app.use(express.json());
