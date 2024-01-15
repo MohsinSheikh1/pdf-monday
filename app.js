@@ -32,5 +32,14 @@ app.use("/api", pdfRoute);
 app.use("/api", userRoute);
 app.use("/page", express.static(`${__dirname}/public`));
 app.use("/api", accountRoute);
+app.route("/monday-app-association.json").get((req, res) => {
+  res.json({
+    apps: [
+      {
+        clientID: "5856e829a851e4cc75bf0b80780176e8",
+      },
+    ],
+  });
+});
 
 module.exports = app;
